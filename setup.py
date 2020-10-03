@@ -5,16 +5,16 @@ except ImportError:
     from distutils.core import setup
 
 setup(
-    name='enocean',
+    name='asyncenocean',
     version='0.50.1',
     description='EnOcean serial protocol implementation',
-    author='Kimmo Huoman',
-    author_email='kipenroskaposti@gmail.com',
-    url='https://github.com/kipe/enocean',
+    author='Matthias Urlichs',
+    author_email='matthias@urlichs.de'
+    url='https://github.com/M-o-a-T/asyncenocean',
     packages=[
-        'enocean',
-        'enocean.protocol',
-        'enocean.communicators',
+        'asyncenocean',
+        'asyncenocean.protocol',
+        'asyncenocean.communicators',
     ],
     scripts=[
         'examples/enocean_example.py',
@@ -24,6 +24,6 @@ setup(
     },
     install_requires=[
         'enum-compat>=0.0.2',
-        'pyserial>=3.0',
+        'anyio_serial',
         'beautifulsoup4>=4.3.2',
     ])
