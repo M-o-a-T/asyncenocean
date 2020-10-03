@@ -10,11 +10,11 @@ The command used here is specified as 1.10.5 Code 03: CO_RD_VERSION
 in the ESP3 document.
 """
 
-from enocean.consolelogger import init_logging
-from enocean import SerialCommunicator
-from enocean.protocol.packet import Packet
-from enocean.protocol.constants import PACKET
-from enocean import utils
+from asyncenocean.consolelogger import init_logging
+from asyncenocean import SerialCommunicator
+from asyncenocean.protocol.packet import Packet
+from asyncenocean.protocol.constants import PACKET
+from asyncenocean import utils
 import sys
 import os
 import anyio

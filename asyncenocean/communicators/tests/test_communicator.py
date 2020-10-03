@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function, unicode_literals, division, absolute_import
 
-from enocean.communicators.communicator import Communicator
-from enocean.protocol.packet import Packet, RadioPacket
-from enocean.protocol.constants import PACKET
-from enocean.decorators import timing
+from asyncenocean.communicators.communicator import Communicator
+from asyncenocean.protocol.packet import Packet, RadioPacket
+from asyncenocean.protocol.constants import PACKET
+from asyncenocean.decorators import timing
 
 
 @timing(1000)

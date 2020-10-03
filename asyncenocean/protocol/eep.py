@@ -6,8 +6,8 @@ from sys import version_info
 from collections import OrderedDict
 from bs4 import BeautifulSoup
 
-import enocean.utils
-from enocean.protocol.constants import RORG
+from .. import utils
+from .constants import RORG
 
 
 class EEP(object):
@@ -35,9 +35,9 @@ class EEP(object):
 
     def __load_xml(self):
         self.telegrams = {
-            enocean.utils.from_hex_string(telegram['rorg']): {
-                enocean.utils.from_hex_string(function['func']): {
-                    enocean.utils.from_hex_string(type['type'], ): type
+            utils.from_hex_string(telegram['rorg']): {
+                utils.from_hex_string(function['func']): {
+                    utils.from_hex_string(type['type'], ): type
                     for type in function.find_all('profile')
                 }
                 for function in telegram.find_all('profiles')

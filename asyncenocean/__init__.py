@@ -1,4 +1,4 @@
-from enocean.protocol import *
+from .protocol import *
 
 def Communicator(*a,**kw):
 	global Communicator

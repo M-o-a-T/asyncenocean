@@ -11,10 +11,10 @@ import sys
 import os
 import time
 import traceback
-import enocean.utils
-from enocean import SerialCommunicator
-from enocean.protocol.packet import RadioPacket, UTETeachInPacket
-from enocean.protocol.constants import RORG
+from asyncenocean import utils
+from asyncenocean import SerialCommunicator
+from asyncenocean.protocol.packet import RadioPacket, UTETeachInPacket
+from asyncenocean.protocol.constants import RORG
 
 import anyio
 
@@ -42,7 +42,7 @@ async def run(port):
                 print('New device learned! The ID is %s.' % (packet.sender_hex))
                 devices_learned.append(packet.sender)
 
-print('Devices learned during this session: %s' % (', '.join([enocean.utils.to_hex_string(x) for x in devices_learned])))
+print('Devices learned during this session: %s' % (', '.join([utils.to_hex_string(x) for x in devices_learned])))
 
 anyio.run(run, port, backend="trio")
 

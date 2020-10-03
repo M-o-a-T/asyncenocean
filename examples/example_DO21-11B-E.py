@@ -11,10 +11,9 @@ import sys
 import os
 import time
 import traceback
-import enocean.utils
-from enocean import SerialCommunicator
-from enocean.protocol.packet import RadioPacket, UTETeachInPacket
-from enocean.protocol.constants import RORG
+from asyncenocean import SerialCommunicator
+from asyncenocean.protocol.packet import RadioPacket, UTETeachInPacket
+from asyncenocean.protocol.constants import RORG
 
 import anyio
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from enocean.consolelogger import init_logging
-from enocean import Communicator
-from enocean.protocol.constants import PACKET, RORG
+from asyncenocean.consolelogger import init_logging
+from asyncenocean import Communicator
+from asyncenocean.protocol.constants import PACKET, RORG
 import sys
 import os
 

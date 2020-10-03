@@ -3,7 +3,7 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import logging
 import anyio
 
-from enocean.communicators.communicator import Communicator
+from .communicator import Communicator
 
 from contextlib import asynccontextmanager
 

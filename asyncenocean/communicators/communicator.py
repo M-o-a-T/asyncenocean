@@ -3,8 +3,8 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import logging
 import datetime
 
-from enocean.protocol.packet import Packet, UTETeachInPacket
-from enocean.protocol.constants import PACKET, PARSE_RESULT, RETURN_CODE
+from ..protocol.packet import Packet, UTETeachInPacket
+from ..protocol.constants import PACKET, PARSE_RESULT, RETURN_CODE
 
 import anyio
 

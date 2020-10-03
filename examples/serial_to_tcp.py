@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from enocean.consolelogger import init_logging
-from enocean import SerialCommunicator
-from enocean import TCPCommunicator
+from asyncenocean.consolelogger import init_logging
+from asyncenocean import SerialCommunicator
+from asyncenocean import TCPCommunicator
 import os
 import anyio
 

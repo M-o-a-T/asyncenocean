@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-from enocean.consolelogger import init_logging
-import enocean.utils
-from enocean import SerialCommunicator
-from enocean.protocol.packet import RadioPacket
-from enocean.protocol.constants import PACKET, RORG
+from asyncenocean.consolelogger import init_logging
+from asyncenocean import utils
+from asyncenocean import SerialCommunicator
+from asyncenocean.protocol.packet import RadioPacket
+from asyncenocean.protocol.constants import PACKET, RORG
 import sys
 import os
 import anyio
@@ -26,7 +26,7 @@ port = os.environ.get("PORT","/dev/ttyUSB0")
 async def run(port):
     async with SerialCommunicator(port) as communicator:
         # Loop to empty the queue...
-        print('The Base ID of your module is %s.' % enocean.utils.to_hex_string(communicator.base_id))
+        print('The Base ID of your module is %s.' % utils.to_hex_string(communicator.base_id))
         if communicator.base_id is not None:
             print('Sending example package.')
             await communicator.send(assemble_radio_packet(communicator.base_id))
