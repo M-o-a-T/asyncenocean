@@ -11,7 +11,7 @@ in the ESP3 document.
 """
 
 from enocean.consolelogger import init_logging
-from enocean.communicators.serialcommunicator import SerialCommunicator
+from enocean import SerialCommunicator
 from enocean.protocol.packet import Packet
 from enocean.protocol.constants import PACKET
 from enocean import utils

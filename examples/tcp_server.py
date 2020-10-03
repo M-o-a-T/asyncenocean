@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 from enocean.consolelogger import init_logging
-from enocean.communicators.communicator import Communicator
+from enocean import Communicator
 from enocean.protocol.constants import PACKET, RORG
 import sys
 import os

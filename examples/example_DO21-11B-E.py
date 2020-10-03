@@ -12,7 +12,7 @@ import os
 import time
 import traceback
 import enocean.utils
-from enocean.communicators import SerialCommunicator
+from enocean import SerialCommunicator
 from enocean.protocol.packet import RadioPacket, UTETeachInPacket
 from enocean.protocol.constants import RORG
 

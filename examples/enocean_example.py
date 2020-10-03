@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 from enocean.consolelogger import init_logging
 import enocean.utils
-from enocean.communicators.serialcommunicator import SerialCommunicator
+from enocean import SerialCommunicator
 from enocean.protocol.packet import RadioPacket
 from enocean.protocol.constants import PACKET, RORG
 import sys
@@ -33,7 +33,7 @@ async def run(port):
 
         while True:
             try:
-                async with anyio.fail_after(1):
+                async with anyio.fail_after(10):
                     packet = await communicator.receive()
             except TimeoutError:
                 break
