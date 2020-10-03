@@ -28,17 +28,8 @@ class Packet(object):
 
         self.received = None
 
-        if not isinstance(data, list) or data is None:
-            self.logger.warning('Replacing Packet.data with default value.')
-            self.data = []
-        else:
-            self.data = data
-
-        if not isinstance(optional, list) or optional is None:
-            self.logger.warning('Replacing Packet.optional with default value.')
-            self.optional = []
-        else:
-            self.optional = optional
+        self.data = data or bytearray()
+        self.optional = optional or bytearray()
 
         self.status = 0
         self.parsed = OrderedDict({})
@@ -106,7 +97,7 @@ class Packet(object):
         '''
         # If the buffer doesn't contain 0x55 (start char)
         # the message isn't needed -> ignore
-        idx = buf.find(bytes(0x55))
+        idx = buf.find(b'\x55')
         if idx == -1:
             buf.clear()
             return 7
@@ -127,7 +118,7 @@ class Packet(object):
         msg_len = 6 + data_len + opt_len + 1
         if len(buf) < msg_len:
             # If buffer isn't long enough, the message is incomplete
-            return PARSE_RESULT.INCOMPLETE, msg_len-len(buf)
+            return msg_len-len(buf)
 
         # Check CRCs for header and data.
         # In both cases we drop the initial 0x55 and let the next run pick
@@ -206,11 +197,11 @@ class Packet(object):
             Packet.logger.warning('Replacing sender with default address.')
             sender = [0xDE, 0xAD, 0xBE, 0xEF]
 
-        if not isinstance(destination, list) or len(destination) != 4:
-            raise ValueError('Destination must a list containing 4 (numeric) values.')
+        if len(destination) != 4:
+            raise ValueError('Destination must be 4 bytes.')
 
-        if not isinstance(sender, list) or len(sender) != 4:
-            raise ValueError('Sender must a list containing 4 (numeric) values.')
+        if len(sender) != 4:
+            raise ValueError('Sender must be 4 bytes.')
 
         packet = Packet(packet_type, data=[], optional=[])
         packet.rorg = rorg
@@ -245,7 +236,7 @@ class Packet(object):
 
         # Parse the built packet, so it corresponds to the received packages
         # For example, stuff like RadioPacket.learn should be set.
-        packet = Packet.parse_msg(packet.build())[2]
+        packet = Packet.parse_msg(packet.build())
         packet.rorg = rorg
         packet.parse_eep(rorg_func, rorg_type, direction, command)
         return packet

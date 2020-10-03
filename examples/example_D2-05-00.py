@@ -8,6 +8,7 @@ Waits for UTE Teach-ins, sends the response automatically and prints the ID of n
 '''
 
 import sys
+import os
 import time
 import traceback
 import enocean.utils
@@ -15,50 +16,33 @@ from enocean.communicators import SerialCommunicator
 from enocean.protocol.packet import RadioPacket, UTETeachInPacket
 from enocean.protocol.constants import RORG
 
-try:
-    import queue
-except ImportError:
-    import Queue as queue
-
-
-def set_position(destination, percentage):
-    global communicator
-    communicator.send(
-        RadioPacket.create(rorg=RORG.VLD, rorg_func=0x05, rorg_type=0x00, destination=destination, sender=communicator.base_id, command=1, POS=percentage)
-    )
-
-
-
-communicator = SerialCommunicator()
-communicator.start()
-print('The Base ID of your module is %s.' % enocean.utils.to_hex_string(communicator.base_id))
-
-
-# set_position([0x05, 0x0F, 0x0B, 0xEA], 100)
-# time.sleep(10)
-set_position([0x05, 0x0F, 0x0B, 0xEA], 50)
-
+import anyio
 
 print('Press and hold the teach-in button on the plug now, till it starts turning itself off and on (about 10 seconds or so...)')
 devices_learned = []
 
+port = os.environ.get("PORT","/dev/ttyUSB0")
+
+async def set_position(comm, destination, percentage):
+    await comm.send(
+        RadioPacket.create(rorg=RORG.VLD, rorg_func=0x05, rorg_type=0x00, destination=destination, sender=comm.base_id, command=1, POS=percentage)
+    )
+
 # endless loop receiving radio packets
-while communicator.is_alive():
-    try:
-        # Loop to empty the queue...
-        packet = communicator.receive.get(block=True, timeout=1)
-        if isinstance(packet, UTETeachInPacket):
-            print('New device learned! The ID is %s.' % (packet.sender_hex))
-            devices_learned.append(packet.sender)
-    except queue.Empty:
-        continue
-    except KeyboardInterrupt:
-        break
-    except Exception:
-        traceback.print_exc(file=sys.stdout)
-        break
+async def run(port):
+    async with SerialCommunicator(port) as communicator:
+        await set_position(communicator, [0x05, 0x0F, 0x0B, 0xEA], 50)
+        while True:
+            try:
+                async with anyio.fail_after(10):
+                    packet = await communicator.receive()
+            except TimeoutError:
+                break
+            if isinstance(packet, UTETeachInPacket):
+                print('New device learned! The ID is %s.' % (packet.sender_hex))
+                devices_learned.append(packet.sender)
 
 print('Devices learned during this session: %s' % (', '.join([enocean.utils.to_hex_string(x) for x in devices_learned])))
 
-if communicator.is_alive():
-    communicator.stop()
+anyio.run(run, port, backend="trio")
+

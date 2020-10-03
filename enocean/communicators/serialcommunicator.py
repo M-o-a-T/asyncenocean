@@ -9,8 +9,8 @@ from anyio_serial import Serial
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
-async def SerialCommunicator(port='/dev/ttyAMA0'):
-    async with Serial(port, 57600).open() as serial:
-        async with Communicator(serial) as comm:
+async def SerialCommunicator(port='/dev/ttyAMA0', **kw):
+    async with Serial(port, 57600) as serial:
+        async with Communicator(serial, **kw) as comm:
             yield comm
 

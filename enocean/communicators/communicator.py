@@ -8,14 +8,14 @@ from enocean.protocol.constants import PACKET, PARSE_RESULT, RETURN_CODE
 
 import anyio
 
-class Communicator(anyio.abc.ObjectStream)
+class Communicator(anyio.abc.ObjectStream):
     '''
     Communicator base-class for EnOcean.
     Not to be used directly, only serves as base class for SerialCommunicator etc.
     '''
     logger = logging.getLogger('enocean.communicators.Communicator')
 
-    def __init__(self, stream: anyio.abc.ByteStream, teach_in=True):
+    def __init__(self, stream: anyio.abc.ByteStream, teach_in=True, client=False):
         self._stream = stream
         # Input buffer
         self._buffer = bytearray()
@@ -24,21 +24,23 @@ class Communicator(anyio.abc.ObjectStream)
         # Should new messages be learned automatically? Defaults to True.
         # TODO: Not sure if we should use CO_WR_LEARNMODE??
         self.teach_in = teach_in
+        self.client = client
 
     async def _init_base(self):
         # Send COMMON_COMMAND 0x08, CO_RD_IDBASE request to the module
         await self.send(Packet(PACKET.COMMON_COMMAND, data=[0x08]))
         # Wait a second until the radio replies.
-        async with anyio.move_on_after(1):
+        async with anyio.move_on_after(10000):
             while True:
-                packet = self.receive()
+                packet = await self.receive()
                 if packet.packet_type == PACKET.RESPONSE and packet.response == RETURN_CODE.OK and len(packet.response_data) == 4:
                     # Base ID is set in the response data.
                     self._base_id = packet.response_data
                     return
 
     async def __aenter__(self):
-        await self._init_base()
+        if not self.client:
+            await self._init_base()
         return self
 
     async def __aexit__(self, *tb):
@@ -50,6 +52,9 @@ class Communicator(anyio.abc.ObjectStream)
 
     async def send(self, packet):
         await self._stream.send(bytearray(packet.build()))
+
+    async def send_eof(self):
+        raise NotImplementedError
 
     async def _read(self):
         return await self.__ser.receive()
@@ -65,7 +70,8 @@ class Communicator(anyio.abc.ObjectStream)
                 continue
 
             # If message is OK, add it to receive queue or send to the callback method
-            if packet is not None:
+            if res is not None:
+                packet = res
                 packet.received = datetime.datetime.now()
                 self.logger.debug(packet)
 

@@ -1,39 +1,34 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 from enocean.consolelogger import init_logging
-from enocean.communicators.tcpcommunicator import TCPCommunicator
+from enocean.communicators.communicator import Communicator
 from enocean.protocol.constants import PACKET, RORG
 import sys
-import traceback
+import os
 
-try:
-    import queue
-except ImportError:
-    import Queue as queue
+import anyio
 
-init_logging()
-communicator = TCPCommunicator()
-communicator.start()
-while communicator.is_alive():
+port = int(os.environ.get("PORT",9637))
+
+async def run(stream):
     try:
-        # Loop to empty the queue...
-        packet = communicator.receive.get(block=True, timeout=1)
-        if packet.packet_type == PACKET.RADIO_ERP1 and packet.rorg == RORG.BS4:
-            for k in packet.parse_eep(0x02, 0x05):
-                print('%s: %s' % (k, packet.parsed[k]))
-        if packet.packet_type == PACKET.RADIO_ERP1 and packet.rorg == RORG.BS1:
-            for k in packet.parse_eep(0x00, 0x01):
-                print('%s: %s' % (k, packet.parsed[k]))
-        if packet.packet_type == PACKET.RADIO_ERP1 and packet.rorg == RORG.RPS:
-            for k in packet.parse_eep(0x02, 0x04):
-                print('%s: %s' % (k, packet.parsed[k]))
-    except queue.Empty:
-        continue
-    except KeyboardInterrupt:
-        break
-    except Exception:
-        traceback.print_exc(file=sys.stdout)
-        break
+        async with Communicator(stream) as communicator:
+            while True:
+                packet = await communicator.receive()
+                if packet.packet_type == PACKET.RADIO_ERP1 and packet.rorg == RORG.BS4:
+                    for k in packet.parse_eep(0x02, 0x05):
+                        print('%s: %s' % (k, packet.parsed[k]))
+                if packet.packet_type == PACKET.RADIO_ERP1 and packet.rorg == RORG.BS1:
+                    for k in packet.parse_eep(0x00, 0x01):
+                        print('%s: %s' % (k, packet.parsed[k]))
+                if packet.packet_type == PACKET.RADIO_ERP1 and packet.rorg == RORG.RPS:
+                    for k in packet.parse_eep(0x02, 0x02):
+                        print('%s: %s' % (k, packet.parsed[k]))
+    except (EnvironmentError, anyio.EndOfStream):
+        pass
 
-if communicator.is_alive():
-    communicator.stop()
+async def listen(port):
+    listener = await anyio.create_tcp_listener(local_port=port)
+    await listener.serve(run)
+
+anyio.run(listen, port, backend="trio")
