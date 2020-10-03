@@ -98,49 +98,59 @@ class Packet(object):
         '''
         Parses message from buffer.
         returns:
-            - PARSE_RESULT
-            - remaining buffer
-            - Packet -object (if message was valid, else None)
+            - if valid message: the message
+            - if incomplete: #bytes required
+            - if CRC error: None
+
+        also modifies the buffer
         '''
         # If the buffer doesn't contain 0x55 (start char)
         # the message isn't needed -> ignore
-        if 0x55 not in buf:
-            return PARSE_RESULT.INCOMPLETE, [], None
+        idx = buf.find(bytes(0x55))
+        if idx == -1:
+            buf.clear()
+            return 7
+        if idx > 0:
+            del buf[0:idx]
 
         # Valid buffer starts from 0x55
         # Convert to list, as index -method isn't defined for bytearray
-        buf = [ord(x) if not isinstance(x, int) else x for x in buf[list(buf).index(0x55):]]
         try:
             data_len = (buf[1] << 8) | buf[2]
             opt_len = buf[3]
         except IndexError:
             # If the fields don't exist, message is incomplete
-            return PARSE_RESULT.INCOMPLETE, buf, None
+            # neet this many more bytes
+            return 7-len(buf)
 
         # Header: 6 bytes, data, optional data and data checksum
         msg_len = 6 + data_len + opt_len + 1
         if len(buf) < msg_len:
             # If buffer isn't long enough, the message is incomplete
-            return PARSE_RESULT.INCOMPLETE, buf, None
+            return PARSE_RESULT.INCOMPLETE, msg_len-len(buf)
 
-        msg = buf[0:msg_len]
-        buf = buf[msg_len:]
-
-        packet_type = msg[4]
-        data = msg[6:6 + data_len]
-        opt_data = msg[6 + data_len:6 + data_len + opt_len]
-
-        # Check CRCs for header and data
-        if msg[5] != crc8.calc(msg[1:5]):
+        # Check CRCs for header and data.
+        # In both cases we drop the initial 0x55 and let the next run pick
+        # up where we left off.
+        if buf[5] != crc8.calc(buf[1:5]):
             # Fail if doesn't match message
             Packet.logger.error('Header CRC error!')
             # Return CRC_MISMATCH
-            return PARSE_RESULT.CRC_MISMATCH, buf, None
-        if msg[6 + data_len + opt_len] != crc8.calc(msg[6:6 + data_len + opt_len]):
+            del buf[0:1]
+            return None
+        if buf[6 + data_len + opt_len] != crc8.calc(buf[6:6 + data_len + opt_len]):
             # Fail if doesn't match message
             Packet.logger.error('Data CRC error!')
             # Return CRC_MISMATCH
-            return PARSE_RESULT.CRC_MISMATCH, buf, None
+            del buf[0:1]
+            return None
+
+        # otherwise move the message off the buffer
+        packet_type = buf[4]
+        data = buf[6:6 + data_len]
+        opt_data = buf[6 + data_len:6 + data_len + opt_len]
+
+        del buf[0:msg_len]
 
         # If we got this far, everything went ok (?)
         if packet_type == PACKET.RADIO_ERP1:
@@ -156,7 +166,7 @@ class Packet(object):
         else:
             packet = Packet(packet_type, data, opt_data)
 
-        return PARSE_RESULT.OK, buf, packet
+        return packet
 
     @staticmethod
     def create(packet_type, rorg, rorg_func, rorg_type, direction=None, command=None,
@@ -278,7 +288,7 @@ class Packet(object):
     def build(self):
         ''' Build Packet for sending to EnOcean controller '''
         data_length = len(self.data)
-        ords = [0x55, (data_length >> 8) & 0xFF, data_length & 0xFF, len(self.optional), int(self.packet_type)]
+        ords = bytearray([0x55, (data_length >> 8) & 0xFF, data_length & 0xFF, len(self.optional), int(self.packet_type)])
         ords.append(crc8.calc(ords[1:5]))
         ords.extend(self.data)
         ords.extend(self.optional)

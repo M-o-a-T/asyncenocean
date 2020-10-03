@@ -17,11 +17,7 @@ from enocean.protocol.constants import PACKET
 from enocean import utils
 import traceback
 import sys
-
-try:
-    import queue
-except ImportError:
-    import Queue as queue
+import os
 
 init_logging()
 """
@@ -29,16 +25,14 @@ init_logging()
 To prevent running the app as root, change the access permissions:
 'sudo chmod 777 /dev/ttyUSB0'
 """
-communicator = SerialCommunicator(port=u'/dev/ttyUSB0', callback=None)
+port = os.environ.get("PORT","/dev/ttyUSB0")
 packet = Packet(PACKET.COMMON_COMMAND, [0x03])
 
-communicator.daemon = True
-communicator.start()
-communicator.send(packet)
-
-while communicator.is_alive():
-    try:
-        receivedPacket = communicator.receive.get(block=True, timeout=1)
+async def run(port):
+    async with SerialCommunicator(port) as communicator:
+        await communicator.send(packet)
+        async with anyio.fail_after(1):
+            receivedPacket = await communicator.receive()
         if receivedPacket.packet_type == PACKET.RESPONSE:
             print('Return Code: %s' % utils.to_hex_string(receivedPacket.data[0]))
             print('APP version: %s' % utils.to_hex_string(receivedPacket.data[1:5]))
@@ -48,13 +42,8 @@ while communicator.is_alive():
             print('App Description Version: %s' % utils.to_hex_string(receivedPacket.data[17:]))
             print('App Description Version (ASCII): %s' % str(bytearray(receivedPacket.data[17:])))
 
-    except queue.Empty:
-        continue
-    except KeyboardInterrupt:
-        break
     except Exception:
-        traceback.print_exc(file=sys.stdout)
+        traceback.print_exc(file=sys.stderr)
         break
 
-if communicator.is_alive():
-    communicator.stop()
+anyio.run(run, port)
