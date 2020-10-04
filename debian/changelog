@@ -1,3 +1,9 @@
+asyncenocean (0.50.1-3) unstable; urgency=medium
+
+  * depend on anyio_serial 
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 04 Oct 2020 22:21:46 +0200
+
 asyncenocean (0.50.1-2) unstable; urgency=medium
 
   * Depend on BS4
