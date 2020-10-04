@@ -1,4 +1,10 @@
-asyncenocean (0.50.1-1) smurf; urgency=low
+asyncenocean (0.50.1-2) unstable; urgency=medium
+
+  * Depend on BS4
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 04 Oct 2020 22:21:07 +0200
+
+asyncenocean (0.50.1-1) unstable; urgency=low
 
   * source package automatically created by stdeb 0.9.1
 
