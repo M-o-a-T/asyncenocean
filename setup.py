@@ -9,7 +9,7 @@ setup(
     version='0.50.1',
     description='EnOcean serial protocol implementation',
     author='Matthias Urlichs',
-    author_email='matthias@urlichs.de'
+    author_email='matthias@urlichs.de',
     url='https://github.com/M-o-a-T/asyncenocean',
     packages=[
         'asyncenocean',
