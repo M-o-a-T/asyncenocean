@@ -1,0 +1,13 @@
+Source: asyncenocean
+Maintainer: Matthias Urlichs <matthias@urlichs.de>
+Section: python
+Priority: optional
+Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 9.20150101)
+Standards-Version: 3.9.6
+Homepage: https://github.com/M-o-a-T/asyncenocean
+
+Package: python3-asyncenocean
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}
+Description: EnOcean serial protocol implementation
+
