@@ -35,9 +35,9 @@ class EEP(object):
 
     def __load_xml(self):
         self.telegrams = {
-            utils.from_hex_string(telegram['rorg']): {
-                utils.from_hex_string(function['func']): {
-                    utils.from_hex_string(type['type'], ): type
+            int(telegram['rorg'], 0): {
+                int(function['func'], 0): {
+                    int(type['type'], 0): type
                     for type in function.find_all('profile')
                 }
                 for function in telegram.find_all('profiles')
