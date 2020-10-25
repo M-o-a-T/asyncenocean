@@ -6,6 +6,7 @@ Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 9.20150
   python3-anyio (>= 2),
   python3-anyio-serial,
   python3-bs4,
+  python3-bitstring (>= 1.7),
 Standards-Version: 3.9.6
 Homepage: https://github.com/M-o-a-T/asyncenocean
 
@@ -15,5 +16,6 @@ Depends: ${misc:Depends}, ${python3:Depends},
   python3-anyio (>= 2),
   python3-anyio-serial,
   python3-bs4,
+  python3-bitstring (>= 1.7),
 Description: EnOcean serial protocol implementation
 
