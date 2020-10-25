@@ -106,12 +106,11 @@ def test_packet_examples():
     }
 
     for packet, values in telegram_examples.items():
-        status, remainder, pack = Packet.parse_msg(values['msg'])
-        assert status == PARSE_RESULT.OK
+        pack = Packet.parse_buffer(values['msg'])
         assert pack.packet_type != 0x00
         assert pack.packet_type == packet
-        assert len(pack.data) == values['data_len']
-        assert len(pack.optional) == values['opt_len']
+        assert pack.data.length == 8*values['data_len']
+        assert pack.optional.length == 8*values['opt_len']
         assert pack.status == 0x00
         assert pack.repeater_count == 0
 
@@ -160,8 +159,8 @@ def test_packet_fails():
     )
 
     for msg in fail_examples:
-        status, remainder, packet = Packet.parse_msg(msg)
-        assert status in [PARSE_RESULT.INCOMPLETE, PARSE_RESULT.CRC_MISMATCH]
+        status = Packet.parse_buffer(msg)
+        assert status is None or isinstance(status, int)
 
 
 def test_packet_equals():
@@ -179,10 +178,10 @@ def test_packet_equals():
         0x08,
         0x38
     ])
-    _, _, packet_1 = Packet.parse_msg(data_1)
-    _, _, packet_2 = Packet.parse_msg(data_2)
+    packet_1 = Packet.parse_buffer(data_1)
+    packet_2 = Packet.parse_buffer(data_2)
 
-    assert str(packet_1) == '0x%02X %s %s %s' % (packet_1.packet_type, [hex(o) for o in packet_1.data], [hex(o) for o in packet_1.optional], packet_1.parsed)
+    assert str(packet_1) == '0x05 08  {}'
     assert str(packet_1) == str(packet_2)
     assert packet_1 == packet_2
 
@@ -196,8 +195,8 @@ def test_event_packet():
         0x07
     ])
 
-    _, _, packet = Packet.parse_msg(data)
+    packet = Packet.parse_buffer(data)
     assert isinstance(packet, EventPacket)
     assert packet.event == EVENT_CODE.SA_RECLAIM_NOT_SUCCESFUL
-    assert packet.event_data == []
-    assert packet.optional == []
+    assert packet.event_data == b''
+    assert packet.optional == b''

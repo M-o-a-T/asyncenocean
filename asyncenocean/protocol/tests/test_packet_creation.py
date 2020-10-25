@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function, unicode_literals, division, absolute_import
 from nose.tools import raises
+from bitstring import BitArray
 
 from asyncenocean.protocol.packet import Packet, RadioPacket
 from asyncenocean.protocol.constants import PACKET, RORG
@@ -46,7 +47,7 @@ def test_packet_assembly():
     packet.rorg = RORG.BS4
     sender_bytes = [(0xdeadbeef >> i & 0xff) for i in (24, 16, 8, 0)]
     data = [0, 0, 0, 0]
-    packet.data = [packet.rorg] + data + sender_bytes + [0]
+    packet.data = BitArray(bytes([packet.rorg] + data + sender_bytes + [0]))
 
     # test content
     packet_serialized = packet.build()
@@ -58,7 +59,7 @@ def test_packet_assembly():
     destination = [255, 255, 255, 255]    # broadcast
     dbm = 0xff
     security = 0
-    packet.optional = [sub_tel_num] + destination + [dbm] + [security]
+    packet.optional = BitArray(bytes([sub_tel_num] + destination + [dbm] + [security]))
 
     # test content
     packet_serialized = packet.build()

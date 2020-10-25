@@ -15,18 +15,6 @@ def combine_hex(data):
     return output
 
 
-def to_bitarray(data, width=8):
-    ''' Convert data (list of integers, bytearray or integer) to bitarray '''
-    if isinstance(data, list) or isinstance(data, bytearray):
-        data = combine_hex(data)
-    return [True if digit == '1' else False for digit in bin(data)[2:].zfill(width)]
-
-
-def from_bitarray(data):
-    ''' Convert bit array back to integer '''
-    return int(''.join(['1' if x else '0' for x in data]), 2)
-
-
 def to_hex_string(data):
     ''' Convert list of integers to a hex string, separated by ":" '''
     if isinstance(data, int):
