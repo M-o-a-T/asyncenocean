@@ -143,6 +143,11 @@ class Packet(object):
 
         del buf[0:msg_len]
 
+        return Packet.parse_msg(packet_type, data, opt_data)
+
+    @staticmethod
+    def parse_msg(packet_type, data, opt_data):
+
         # If we got this far, everything went ok (?)
         if packet_type == PACKET.RADIO_ERP1:
             # Need to handle UTE Teach-in here, as it's a separate packet type...
@@ -165,7 +170,7 @@ class Packet(object):
                sender=None,
                learn=False, **kwargs):
         '''
-        Creates an packet ready for sending.
+        Creates a packet ready for sending.
         Uses rorg, rorg_func and rorg_type to determine the values set based on EEP.
         Additional arguments (**kwargs) are used for setting the values.
 
