@@ -12,7 +12,7 @@ def test_ute_in():
     communicator = Communicator()
     communicator.base_id = [0xDE, 0xAD, 0xBE, 0xEF]
 
-    status, buf, packet = Packet.parse_msg(
+    packet = Packet.parse_buffer(
         bytearray([
             0x55,
             0x00, 0x0D, 0x07, 0x01,
