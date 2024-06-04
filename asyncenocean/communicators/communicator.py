@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function, unicode_literals, division, absolute_import
+from __future__ import annotations
 import logging
 import datetime
 

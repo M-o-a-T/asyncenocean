@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 
-import anyio
 from contextlib import asynccontextmanager
 from distmqtt.client import open_mqttclient
 from distmqtt.codecs import MsgPackCodec
