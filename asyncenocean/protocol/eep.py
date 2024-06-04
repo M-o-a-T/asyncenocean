@@ -7,7 +7,8 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup
 
 from .. import utils
-from .constants import RORG
+# Left as a helper
+from .constants import RORG  # noqa: F401
 
 
 class EEP(object):
@@ -17,12 +18,13 @@ class EEP(object):
         self.init_ok = False
         self.telegrams = {}
 
+        eep_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'EEP.xml')
         try:
             if version_info[0] > 2:
-                with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'EEP.xml'), 'r', encoding='UTF-8') as xml_file:
+                with open(eep_path, 'r', encoding='UTF-8') as xml_file:
                     self.soup = BeautifulSoup(xml_file.read(), "html.parser")
             else:
-                with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'EEP.xml'), 'r') as xml_file:
+                with open(eep_path, 'r') as xml_file:
                     self.soup = BeautifulSoup(xml_file.read(), "html.parser")
             self.init_ok = True
             self.__load_xml()
@@ -159,15 +161,15 @@ class EEP(object):
             return None
 
         if eep_rorg not in self.telegrams.keys():
-            self.logger.warn('Cannot find rorg in EEP!')
+            self.logger.warn('Cannot find rorg %s in EEP!', hex(eep_rorg))
             return None
 
         if rorg_func not in self.telegrams[eep_rorg].keys():
-            self.logger.warn('Cannot find func in EEP!')
+            self.logger.warn('Cannot find rorg %s func %s in EEP!', hex(eep_rorg), hex(rorg_func))
             return None
 
         if rorg_type not in self.telegrams[eep_rorg][rorg_func].keys():
-            self.logger.warn('Cannot find type in EEP!')
+            self.logger.warn('Cannot find rorg %s func %s type %s in EEP!', hex(eep_rorg), hex(rorg_func), hex(rorg_type))
             return None
 
         profile = self.telegrams[eep_rorg][rorg_func][rorg_type]

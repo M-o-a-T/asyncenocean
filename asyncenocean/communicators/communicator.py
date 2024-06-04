@@ -33,7 +33,7 @@ class Communicator(anyio.abc.ObjectStream):
         async with anyio.move_on_after(10000):
             while True:
                 packet = await self.receive()
-                if packet.packet_type == PACKET.RESPONSE and packet.response == RETURN_CODE.OK and len(packet.response_data) == 4:
+                if packet.packet_type == PACKET.RESPONSE and packet.response == RETURN_CODE.OK and len(packet.response_data) == 4:  # noqa: E501
                     # Base ID is set in the response data.
                     self._base_id = packet.response_data
                     return

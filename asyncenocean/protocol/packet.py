@@ -39,20 +39,26 @@ class Packet(object):
         self.parse()
 
     def __str__(self):
-        return '0x%02X %s %s %s' % (self.packet_type, [hex(o) for o in self.data], [hex(o) for o in self.optional], self.parsed)
+        return '0x%02X %s %s %s' % (
+            self.packet_type,
+            [hex(o) for o in self.data],
+            [hex(o) for o in self.optional],
+            self.parsed)
 
     def __unicode__(self):
         return self.__str__()
 
     def __eq__(self, other):
-        return self.packet_type == other.packet_type and self.rorg == other.rorg and self.data == other.data and self.optional == other.optional
+        return self.packet_type == other.packet_type and self.rorg == other.rorg \
+            and self.data == other.data and self.optional == other.optional
 
     @property
     def _bit_data(self):
         # First and last 5 bits are always defined, so the data we're modifying is between them...
         # TODO: This is valid for the packets we're currently manipulating.
         # Needs the redefinition of Packet.data -> Packet.message.
-        # Packet.data would then only have the actual, documented data-bytes. Packet.message would contain the whole message.
+        # Packet.data would then only have the actual, documented data-bytes.
+        # Packet.message would contain the whole message.
         # See discussion in issue #14
         return utils.to_bitarray(self.data[1:len(self.data) - 5], (len(self.data) - 6) * 8)
 
@@ -301,7 +307,8 @@ class RadioPacket(Packet):
     @staticmethod
     def create(rorg, rorg_func, rorg_type, direction=None, command=None,
                destination=None, sender=None, learn=False, **kwargs):
-        return Packet.create(PACKET.RADIO_ERP1, rorg, rorg_func, rorg_type, direction, command, destination, sender, learn, **kwargs)
+        return Packet.create(PACKET.RADIO_ERP1, rorg, rorg_func, rorg_type,
+                             direction, command, destination, sender, learn, **kwargs)
 
     @property
     def sender_int(self):

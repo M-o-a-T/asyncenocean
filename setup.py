@@ -6,7 +6,7 @@ except ImportError:
 
 setup(
     name='asyncenocean',
-    version='0.50.1',
+    version='0.60.1',
     description='EnOcean serial protocol implementation',
     author='Matthias Urlichs',
     author_email='matthias@urlichs.de',
