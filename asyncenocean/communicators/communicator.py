@@ -14,13 +14,13 @@ class Communicator(anyio.abc.ObjectStream):
     Not to be used directly, only serves as base class for SerialCommunicator etc.
     '''
     logger = logging.getLogger('enocean.communicators.Communicator')
+    # Internal variable for the Base ID of the module.
+    _base_id = None
 
-    def __init__(self, stream: anyio.abc.ByteStream, teach_in=True, client=False):
+    def __init__(self, stream: anyio.abc.ByteStream = None, teach_in=True, client=False):
         self._stream = stream
         # Input buffer
         self._buffer = bytearray()
-        # Internal variable for the Base ID of the module.
-        self._base_id = None
         # Should new messages be learned automatically? Defaults to True.
         # TODO: Not sure if we should use CO_WR_LEARNMODE??
         self.teach_in = teach_in
@@ -63,7 +63,7 @@ class Communicator(anyio.abc.ObjectStream):
         ''' Parses messages and puts them to receive queue '''
         # Loop while we get new messages
         while True:
-            res = Packet.parse_msg(self._buffer)
+            res = Packet.parse_buffer(self._buffer)
             # If message is incomplete -> break the loop
             if isinstance(res, int):
                 self._buffer.extend(bytearray(await self._stream.receive(16)))

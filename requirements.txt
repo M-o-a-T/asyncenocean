@@ -2,3 +2,4 @@ enum-compat>=0.0.2
 serial>=3.0
 anyio_serial
 beautifulsoup4>=4.3.2
+bitstring>=3.1

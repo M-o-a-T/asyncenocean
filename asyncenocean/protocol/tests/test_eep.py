@@ -10,7 +10,7 @@ from asyncenocean.decorators import timing
 @timing(1000)
 def test_temperature():
     ''' Tests RADIO message for EEP -profile 0xA5 0x02 0x05 '''
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x0A, 0x07, 0x01,
         0xEB,
@@ -29,14 +29,14 @@ def test_temperature():
     assert packet.rorg_type == 0x05
     assert packet.status == 0x00
     assert packet.repeater_count == 0
-    assert packet.sender == [0x01, 0x81, 0xB7, 0x44]
+    assert packet.sender == bytes([0x01, 0x81, 0xB7, 0x44])
     assert packet.sender_hex == '01:81:B7:44'
 
 
 @timing(1000)
 def test_magnetic_switch():
     ''' Tests RADIO message for EEP -profile 0xD5 0x00 0x01 '''
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x07, 0x07, 0x01,
         0x7A,
@@ -50,7 +50,7 @@ def test_magnetic_switch():
     assert packet.status == 0x00
     assert packet.repeater_count == 0
 
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x07, 0x07, 0x01,
         0x7A,
@@ -68,7 +68,7 @@ def test_magnetic_switch():
 
 @timing(1000)
 def test_switch():
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x07, 0x07, 0x01,
         0x7A,
@@ -86,7 +86,7 @@ def test_switch():
     assert packet.status == 0x30
     assert packet.repeater_count == 0
 
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x07, 0x07, 0x01,
         0x7A,
@@ -106,7 +106,7 @@ def test_switch():
 
 @timing(1000)
 def test_eep_parsing():
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x0A, 0x07, 0x01,
         0xEB,
@@ -125,7 +125,7 @@ def test_eep_parsing():
 @timing(1000)
 def test_eep_remaining():
     # Magnetic switch -example
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x07, 0x07, 0x01,
         0x7A,
@@ -136,7 +136,7 @@ def test_eep_remaining():
     assert packet.parse_eep(0x00, 0x01) == ['CO']
 
     # Temperature-example
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x0A, 0x07, 0x01,
         0xEB,
@@ -152,7 +152,7 @@ def test_eep_remaining():
 
 @timing(1000)
 def test_eep_direction():
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x0A, 0x07, 0x01,
         0xEB,
@@ -168,7 +168,7 @@ def test_eep_direction():
 
 @timing(1000)
 def test_vld():
-    status, buf, p = Packet.parse_msg(bytearray([
+    p = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x09, 0x07, 0x01,
         0x56,
@@ -200,7 +200,7 @@ def test_vld():
     assert p.parsed['LC']['raw_value'] == 0
     assert p.parsed['LC']['value'] == 'Local control disabled / not supported'
 
-    status, buf, p = Packet.parse_msg(bytearray([
+    p = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x09, 0x07, 0x01,
         0x56,
@@ -234,7 +234,7 @@ def test_vld():
 
 
 def test_fails():
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x07, 0x07, 0x01,
         0x7A,
@@ -256,7 +256,7 @@ def test_fails():
     assert eep.find_profile(packet._bit_data, 0xD5, 0xFF, 0x01) is None
     assert eep.find_profile(packet._bit_data, 0xD5, 0x00, 0xFF) is None
 
-    status, buf, packet = Packet.parse_msg(bytearray([
+    packet = Packet.parse_buffer(bytearray([
         0x55,
         0x00, 0x09, 0x07, 0x01,
         0x56,

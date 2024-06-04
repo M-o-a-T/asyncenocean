@@ -3,8 +3,8 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import os
 import logging
 from sys import version_info
-from collections import OrderedDict
 from bs4 import BeautifulSoup
+from bitstring import Bits
 
 from .. import utils
 # Left as a helper
@@ -32,14 +32,14 @@ class EEP(object):
             # Impossible to test with the current structure?
             # To be honest, as the XML is included with the library,
             # there should be no possibility of ever reaching this...
-            self.logger.warn('Cannot load protocol file!')
+            self.logger.warning('Cannot load protocol file!')
             self.init_ok = False
 
     def __load_xml(self):
         self.telegrams = {
-            utils.from_hex_string(telegram['rorg']): {
-                utils.from_hex_string(function['func']): {
-                    utils.from_hex_string(type['type'], ): type
+            int(telegram['rorg'], 0): {
+                int(function['func'], 0): {
+                    int(type['type'], 0): type
                     for type in function.find_all('profile')
                 }
                 for function in telegram.find_all('profiles')
@@ -52,15 +52,14 @@ class EEP(object):
         ''' Get raw data as integer, based on offset and size '''
         offset = int(source['offset'])
         size = int(source['size'])
-        return int(''.join(['1' if digit else '0' for digit in bitarray[offset:offset + size]]), 2)
+        return bitarray[offset:offset + size].uint
 
     @staticmethod
     def _set_raw(target, raw_value, bitarray):
         ''' put value into bit array '''
         offset = int(target['offset'])
         size = int(target['size'])
-        for digit in range(size):
-            bitarray[offset+digit] = (raw_value >> (size-digit-1)) & 0x01 != 0
+        bitarray.overwrite(Bits(uint=raw_value, length=size), pos=offset)
         return bitarray
 
     @staticmethod
@@ -157,19 +156,19 @@ class EEP(object):
     def find_profile(self, bitarray, eep_rorg, rorg_func, rorg_type, direction=None, command=None):
         ''' Find profile and data description, matching RORG, FUNC and TYPE '''
         if not self.init_ok:
-            self.logger.warn('EEP.xml not loaded!')
+            self.logger.warning('EEP.xml not loaded!')
             return None
 
         if eep_rorg not in self.telegrams.keys():
-            self.logger.warn('Cannot find rorg %s in EEP!', hex(eep_rorg))
+            self.logger.warning('Cannot find rorg %s in EEP!', hex(eep_rorg))
             return None
 
         if rorg_func not in self.telegrams[eep_rorg].keys():
-            self.logger.warn('Cannot find rorg %s func %s in EEP!', hex(eep_rorg), hex(rorg_func))
+            self.logger.warning('Cannot find rorg %s func %s in EEP!', hex(eep_rorg), hex(rorg_func))
             return None
 
         if rorg_type not in self.telegrams[eep_rorg][rorg_func].keys():
-            self.logger.warn('Cannot find rorg %s func %s type %s in EEP!', hex(eep_rorg), hex(rorg_func), hex(rorg_type))
+            self.logger.warning('Cannot find rorg %s func %s type %s in EEP!', hex(eep_rorg), hex(rorg_func), hex(rorg_type))
             return None
 
         profile = self.telegrams[eep_rorg][rorg_func][rorg_type]
@@ -196,7 +195,7 @@ class EEP(object):
         if not self.init_ok or profile is None:
             return [], {}
 
-        output = OrderedDict({})
+        output = {}
         for source in profile.contents:
             if not source.name:
                 continue
