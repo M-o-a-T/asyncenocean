@@ -6,9 +6,13 @@ import datetime
 from ..protocol.packet import Packet, UTETeachInPacket
 from ..protocol.constants import PACKET, PARSE_RESULT, RETURN_CODE
 
-import anyio
+from moat.micro.compat import wait_for
+try:
+    from anyio.abc import ObjectStream as OS
+except ImportError:
+    OS = object
 
-class Communicator(anyio.abc.ObjectStream):
+class Communicator(OS):
     '''
     Communicator base-class for EnOcean.
     Not to be used directly, only serves as base class for SerialCommunicator etc.
@@ -30,13 +34,15 @@ class Communicator(anyio.abc.ObjectStream):
         # Send COMMON_COMMAND 0x08, CO_RD_IDBASE request to the module
         await self.send(Packet(PACKET.COMMON_COMMAND, data=[0x08]))
         # Wait a second until the radio replies.
-        async with anyio.move_on_after(10000):
-            while True:
-                packet = await self.receive()
-                if packet.packet_type == PACKET.RESPONSE and packet.response == RETURN_CODE.OK and len(packet.response_data) == 4:
-                    # Base ID is set in the response data.
-                    self._base_id = packet.response_data
-                    return
+        await wait_for(10000, self._init_base_)
+
+    async def _init_base_(self):
+        while True:
+            packet = await self.receive()
+            if packet.packet_type == PACKET.RESPONSE and packet.response == RETURN_CODE.OK and len(packet.response_data) == 4:
+                # Base ID is set in the response data.
+                self._base_id = packet.response_data
+                return
 
     async def __aenter__(self):
         if not self.client:
